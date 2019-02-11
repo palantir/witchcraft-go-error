@@ -62,7 +62,7 @@ func Convert(err error) error {
 	case *werror:
 		return err
 	default:
-		return Error(err.Error())
+		return newWerror("", err)
 	}
 }
 
@@ -191,6 +191,9 @@ func newWerror(message string, cause error, params ...Param) error {
 func (e *werror) Error() string {
 	if e.cause == nil {
 		return e.message
+	}
+	if e.message == "" {
+		return e.cause.Error()
 	}
 	return e.message + ": " + e.cause.Error()
 }
