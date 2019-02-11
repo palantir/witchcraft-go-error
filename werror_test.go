@@ -419,6 +419,10 @@ func TestRootCause(t *testing.T) {
 		rootCause error
 		err       error
 	}{{
+		name:      "nil error",
+		rootCause: nil,
+		err:       nil,
+	}, {
 		name:      "new werror error",
 		rootCause: werrorErr,
 		err:       werrorErr,
@@ -427,6 +431,10 @@ func TestRootCause(t *testing.T) {
 		rootCause: werrorErr,
 		err:       werror.Wrap(werrorErr, "wrap", werror.SafeParam("safeKey", "safeVal")),
 	}, {
+		name:      "converted werror error",
+		rootCause: werrorErr,
+		err:       werror.Convert(werrorErr),
+	}, {
 		name:      "custom error",
 		rootCause: customErr,
 		err:       customErr,
@@ -434,6 +442,10 @@ func TestRootCause(t *testing.T) {
 		name:      "wrapped custom error",
 		rootCause: customErr,
 		err:       werror.Wrap(customErr, "wrap", werror.SafeParam("safeKey", "safeVal")),
+	}, {
+		name:      "converted custom error",
+		rootCause: customErr,
+		err:       werror.Convert(customErr),
 	}} {
 		t.Run(currCase.name, func(t *testing.T) {
 			assert.Equal(t, currCase.rootCause, werror.RootCause(currCase.err))
