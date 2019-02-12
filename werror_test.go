@@ -115,6 +115,89 @@ testing.tRunner
 runtime.goexit
 	.+$`,
 		},
+		{
+			name: "wrapped with empty string",
+			err: werror.Wrap(
+				werror.Error("rootcause"),
+				"",
+			),
+			stringified: "rootcause",
+			verbose:     `rootcause`,
+			extraVerboseRegexp: `^rootcause
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+
+
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+$`,
+		},
+		{
+			name: "wrapped with empty string and params",
+			err: werror.Wrap(
+				werror.Error("rootcause"),
+				"",
+				werror.SafeParam("safeEmptyWrapperKey", "safeEmptyWrapperValue"),
+				werror.UnsafeParam("unsafeWrapperKey", "unsafeWrapperValue"),
+			),
+			stringified: "rootcause",
+			verbose:     `map[safeEmptyWrapperKey:safeEmptyWrapperValue]: rootcause`,
+			extraVerboseRegexp: `^rootcause
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+
+map\[safeEmptyWrapperKey:safeEmptyWrapperValue\]
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+$`,
+		},
+		{
+			name: "wrapped custom error with params",
+			err: werror.Wrap(
+				fmt.Errorf("customErr"),
+				"wrapper",
+				werror.SafeParam("safeWrapperKey", "safeWrapperValue"),
+				werror.UnsafeParam("unsafeWrapperKey", "unsafeWrapperValue"),
+			),
+			stringified: "wrapper: customErr",
+			verbose:     `wrapper map[safeWrapperKey:safeWrapperValue]: customErr`,
+			extraVerboseRegexp: `^customErr
+wrapper map\[safeWrapperKey:safeWrapperValue\]
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+$`,
+		},
+		{
+			name: "converted custom error",
+			err: werror.Convert(
+				fmt.Errorf("customErr"),
+			),
+			stringified: "customErr",
+			verbose:     `customErr`,
+			extraVerboseRegexp: `^customErr
+
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+$`,
+		},
 	} {
 		t.Run(currCase.name, func(t *testing.T) {
 			require.Error(t, currCase.err)
@@ -419,6 +502,10 @@ func TestRootCause(t *testing.T) {
 		rootCause error
 		err       error
 	}{{
+		name:      "nil error",
+		rootCause: nil,
+		err:       nil,
+	}, {
 		name:      "new werror error",
 		rootCause: werrorErr,
 		err:       werrorErr,
@@ -427,6 +514,10 @@ func TestRootCause(t *testing.T) {
 		rootCause: werrorErr,
 		err:       werror.Wrap(werrorErr, "wrap", werror.SafeParam("safeKey", "safeVal")),
 	}, {
+		name:      "converted werror error",
+		rootCause: werrorErr,
+		err:       werror.Convert(werrorErr),
+	}, {
 		name:      "custom error",
 		rootCause: customErr,
 		err:       customErr,
@@ -434,6 +525,10 @@ func TestRootCause(t *testing.T) {
 		name:      "wrapped custom error",
 		rootCause: customErr,
 		err:       werror.Wrap(customErr, "wrap", werror.SafeParam("safeKey", "safeVal")),
+	}, {
+		name:      "converted custom error",
+		rootCause: customErr,
+		err:       werror.Convert(customErr),
 	}} {
 		t.Run(currCase.name, func(t *testing.T) {
 			assert.Equal(t, currCase.rootCause, werror.RootCause(currCase.err))
