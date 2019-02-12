@@ -164,6 +164,25 @@ runtime.goexit
 	.+$`,
 		},
 		{
+			name: "wrapped custom error with params",
+			err: werror.Wrap(
+				fmt.Errorf("customErr"),
+				"wrapper",
+				werror.SafeParam("safeWrapperKey", "safeWrapperValue"),
+				werror.UnsafeParam("unsafeWrapperKey", "unsafeWrapperValue"),
+			),
+			stringified: "wrapper: customErr",
+			verbose:     `wrapper map[safeWrapperKey:safeWrapperValue]: customErr`,
+			extraVerboseRegexp: `^customErr
+wrapper map\[safeWrapperKey:safeWrapperValue\]
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+$`,
+		},
+		{
 			name: "converted custom error",
 			err: werror.Convert(
 				fmt.Errorf("customErr"),
