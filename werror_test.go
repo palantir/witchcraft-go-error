@@ -115,6 +115,69 @@ testing.tRunner
 runtime.goexit
 	.+$`,
 		},
+		{
+			name: "wrapped with empty string",
+			err: werror.Wrap(
+				werror.Error("rootcause"),
+				"",
+			),
+			stringified: "rootcause",
+			verbose:     `rootcause`,
+			extraVerboseRegexp: `^rootcause
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+
+
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+$`,
+		},
+		{
+			name: "wrapped with empty string and params",
+			err: werror.Wrap(
+				werror.Error("rootcause"),
+				"",
+				werror.SafeParam("safeEmptyWrapperKey", "safeEmptyWrapperValue"),
+				werror.UnsafeParam("unsafeWrapperKey", "unsafeWrapperValue"),
+			),
+			stringified: "rootcause",
+			verbose:     `map[safeEmptyWrapperKey:safeEmptyWrapperValue]: rootcause`,
+			extraVerboseRegexp: `^rootcause
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+
+map\[safeEmptyWrapperKey:safeEmptyWrapperValue\]
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+$`,
+		},
+		{
+			name: "converted custom error",
+			err: werror.Convert(
+				fmt.Errorf("customErr"),
+			),
+			stringified: "customErr",
+			verbose:     `customErr`,
+			extraVerboseRegexp: `^customErr
+` + pkgPath + `_test.TestError_Format
+	.+
+testing.tRunner
+	.+
+runtime.goexit
+	.+$`,
+		},
 	} {
 		t.Run(currCase.name, func(t *testing.T) {
 			require.Error(t, currCase.err)
