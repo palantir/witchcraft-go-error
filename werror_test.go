@@ -190,6 +190,7 @@ runtime.goexit
 			stringified: "customErr",
 			verbose:     `customErr`,
 			extraVerboseRegexp: `^customErr
+
 ` + pkgPath + `_test.TestError_Format
 	.+
 testing.tRunner
