@@ -6,7 +6,8 @@ storing and retrieving `ParamStorer` implementations in from a context.
 Conceptually, "params" are values that are associated with a specific key that provide context about an operation that
 is being performed. Params are categorized as "safe" or "unsafe" -- "safe" params are parameters which are considered
 safe to ship/export/expose off-premises, while "unsafe" parameters are parameters that should not leave the premises.
-Param values are typically used by things such as loggers and errors to provide further context for an operation.
+Param values are typically used by things such as loggers and errors to provide further context for an operation. Keys
+are case-sensitive and must be unique across both safe and unsafe parameters.
 
 The following is a short example of a canonical use case:
 
@@ -64,3 +65,7 @@ func UpdateUserInfo(ctx context.Context, userID UserID, info UserInfo) error {
 
 This pattern allows a type to dictate its default behavior for its name and whether it is safe/unsafe, which makes it
 easier to ensure that the parameter is consistent across various usages.
+
+License
+-------
+This project is made available under the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0).
