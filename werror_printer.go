@@ -34,7 +34,7 @@ func writeMessage(err *werror, buffer *bytes.Buffer) {
 }
 
 func writeParams(err *werror, buffer *bytes.Buffer) {
-	safeParams := err.SafeParams()
+	safeParams := getSafeParamsAtCurrentLevel(err)
 	var safeKeys []string
 	for k := range safeParams {
 		safeKeys = append(safeKeys, k)
@@ -55,6 +55,30 @@ func writeParams(err *werror, buffer *bytes.Buffer) {
 	if messageOrParams {
 		buffer.WriteString("\n")
 	}
+}
+
+func getSafeParamsAtCurrentLevel(err *werror) map[string]interface{} {
+	safeParamsAtThisLevel := make(map[string]interface{}, 0)
+	childSafeParams := getChildSafeParams(err)
+	for k, v := range err.SafeParams() {
+		_, ok := childSafeParams[k]
+		if ok {
+			continue
+		}
+		safeParamsAtThisLevel[k] = v
+	}
+	return safeParamsAtThisLevel
+}
+
+func getChildSafeParams(err *werror) map[string]interface{} {
+	if err.cause == nil {
+		return make(map[string]interface{}, 0)
+	}
+	causeAsWerror, ok := err.cause.(*werror)
+	if !ok {
+		return make(map[string]interface{}, 0)
+	}
+	return causeAsWerror.SafeParams()
 }
 
 func writeCause(err *werror, buffer *bytes.Buffer, outputEveryCallingStack bool) {
