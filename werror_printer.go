@@ -7,8 +7,8 @@ import (
 )
 
 func GenerateErrorString(err error, outputEveryCallingStack bool) string {
-	if zerror, ok := err.(*werror); ok {
-		return generateZerrorString(zerror, outputEveryCallingStack)
+	if werror, ok := err.(*werror); ok {
+		return generateWerrorString(werror, outputEveryCallingStack)
 	}
 	if fancy, ok := err.(fmt.Formatter); ok {
 		// This is a rich error type, like those produced by github.com/pkg/errors.
@@ -17,7 +17,7 @@ func GenerateErrorString(err error, outputEveryCallingStack bool) string {
 	return err.Error()
 }
 
-func generateZerrorString(err *werror, outputEveryCallingStack bool) string {
+func generateWerrorString(err *werror, outputEveryCallingStack bool) string {
 	var buffer bytes.Buffer
 	writeMessage(err, &buffer)
 	writeParams(err, &buffer)
