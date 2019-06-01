@@ -6,6 +6,13 @@ import (
 	"sort"
 )
 
+// GenerateErrorString will attempt to pretty print an error depending on its underlying type
+// If it is a werror then:
+// 1) Each message and params will be groups together on a separate line
+// 2) Only the deepest werror stacktrace will be printed
+// 3) GenerateErrorString will be called recursively to pretty print underlying errors as well
+// If the error implements the fmt.Formatter interface, then it will be printed verbosely
+// Otherwise, the error's underlying Error() function will be called and returned
 func GenerateErrorString(err error, outputEveryCallingStack bool) string {
 	if werror, ok := err.(*werror); ok {
 		return generateWerrorString(werror, outputEveryCallingStack)
