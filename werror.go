@@ -4,7 +4,7 @@ package werror
 import (
 	"fmt"
 
-	"github.com/palantir/witchcraft-go-params"
+	wparams "github.com/palantir/witchcraft-go-params"
 )
 
 // Error returns a new error with the provided message and parameters.
