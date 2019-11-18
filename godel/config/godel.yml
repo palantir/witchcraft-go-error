@@ -13,3 +13,4 @@ exclude:
     - vendor
   paths:
     - godel
+    - internal/errors
