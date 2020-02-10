@@ -2,6 +2,7 @@
 package werror
 
 import (
+	"context"
 	"fmt"
 
 	wparams "github.com/palantir/witchcraft-go-params"
@@ -19,8 +20,20 @@ import (
 //		return werror.Error("configuration is missing password")
 //	}
 //
+// DEPRECATED: Please use ErrorWithContext instead to get full params
 func Error(msg string, params ...Param) error {
 	return newWerror(msg, nil, params...)
+}
+
+// ErrorWithContext is identical to Error but also pulls safe and unsafe params out of the context
+func ErrorWithContext(ctx context.Context, msg string, params ...Param) error {
+	safe, unsafe := wparams.SafeAndUnsafeParamsFromContext(ctx)
+	fullParams := []Param{
+		SafeParams(safe),
+		UnsafeParams(unsafe),
+	}
+	fullParams = append(fullParams, params...)
+	return Error(msg, fullParams...)
 }
 
 // Wrap returns a new error with the provided message and stores the provided error as its cause.
@@ -35,11 +48,23 @@ func Error(msg string, params ...Param) error {
 //		return werror.Wrap(err, "failed to get user", werror.SafeParam("userId", userID))
 //	}
 //
+// DEPRECATED: Please use WrapWithContext instead to get full params
 func Wrap(err error, msg string, params ...Param) error {
 	if err == nil {
 		return nil
 	}
 	return newWerror(msg, err, params...)
+}
+
+// WrapWithContext is identical to Wrap but also pulls safe and unsafe params out of the context
+func WrapWithContext(ctx context.Context, err error, msg string, params ...Param) error {
+	safe, unsafe := wparams.SafeAndUnsafeParamsFromContext(ctx)
+	fullParams := []Param{
+		SafeParams(safe),
+		UnsafeParams(unsafe),
+	}
+	fullParams = append(fullParams, params...)
+	return Wrap(err, msg, fullParams...)
 }
 
 // Convert err to werror error.
