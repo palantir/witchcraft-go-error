@@ -7,6 +7,7 @@ import (
 
 	werror "github.com/palantir/witchcraft-go-error"
 	"github.com/palantir/witchcraft-go-error/internal/errors"
+	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -49,15 +50,15 @@ func TestError_Format(t *testing.T) {
 			verbose:     `message`,
 			extraVerboseRegexp: `^message
 ` + pkgPath + `_test.TestError_Format
-       .+
+	.+
 testing.tRunner
-       .+
- runtime.goexit
-        .+$`,
+	.+
+runtime.goexit
+	.+$`,
 		},
 		{
 			name: "new error with params",
-			err: werror.Error( "message",
+			err: werror.Error("message",
 				werror.UnsafeParam("unsafeKey", "unsafeKey"),
 				werror.SafeParam("safeKey", paramObject{
 					A: "public value A",
@@ -142,7 +143,7 @@ runtime.goexit
 		{
 			name: "wrapped with empty string and params",
 			err: werror.Wrap(
-				werror.Error( "rootcause"),
+				werror.Error("rootcause"),
 				"",
 				werror.SafeParam("safeEmptyWrapperKey", "safeEmptyWrapperValue"),
 				werror.UnsafeParam("unsafeWrapperKey", "unsafeWrapperValue"),
@@ -535,4 +536,27 @@ func TestRootCause(t *testing.T) {
 			assert.Equal(t, currCase.rootCause, werror.RootCause(currCase.err))
 		})
 	}
+}
+
+func TestErrorPullsOutParamsFromContext(t *testing.T) {
+	ctx := context.Background()
+	safe := map[string]interface{}{"safeKey": "safeValue"}
+	unsafe := map[string]interface{}{"unsafeKey": "unsafeValue"}
+	ctx = wparams.ContextWithSafeAndUnsafeParams(ctx, safe, unsafe)
+	err := werror.ErrorWithContext(ctx, "error", werror.SafeParam("anotherSafeKey", "anotherSafeValue"), werror.UnsafeParam("anotherUnsafeKey", "anotherUnsafeValue"))
+	safeFromError, unSafeFromError := werror.ParamsFromError(err)
+	assert.Equal(t, map[string]interface{}{"safeKey": "safeValue", "anotherSafeKey": "anotherSafeValue"}, safeFromError)
+	assert.Equal(t, map[string]interface{}{"unsafeKey": "unsafeValue", "anotherUnsafeKey": "anotherUnsafeValue"}, unSafeFromError)
+}
+
+func TestWrapPullsOutParamsFromContext(t *testing.T) {
+	ctx := context.Background()
+	safe := map[string]interface{}{"safeKey": "safeValue"}
+	unsafe := map[string]interface{}{"unsafeKey": "unsafeValue"}
+	ctx = wparams.ContextWithSafeAndUnsafeParams(ctx, safe, unsafe)
+	rawErr := werror.Error("err", werror.SafeParam("anotherSafeKey", "anotherSafeValue"), werror.UnsafeParam("anotherUnsafeKey", "anotherUnsafeValue"))
+	err := werror.WrapWithContext(ctx, rawErr, "bad", werror.SafeParam("aThirdSafeKey", "aThirdSafeValue"), werror.UnsafeParam("aThirdUnsafeKey", "aThirdUnsafeValue"))
+	safeFromError, unSafeFromError := werror.ParamsFromError(err)
+	assert.Equal(t, map[string]interface{}{"safeKey": "safeValue", "anotherSafeKey": "anotherSafeValue", "aThirdSafeKey": "aThirdSafeValue"}, safeFromError)
+	assert.Equal(t, map[string]interface{}{"unsafeKey": "unsafeValue", "anotherUnsafeKey": "anotherUnsafeValue", "aThirdUnsafeKey": "aThirdUnsafeValue"}, unSafeFromError)
 }
