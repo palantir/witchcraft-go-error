@@ -8,14 +8,15 @@ import (
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 
-// Error is identical to ErrorWithContext except it does move params from the context to the error
-// DEPRECATED: Please use ErrorWithContext instead to get full params
+// Error is identical to calling ErrorWithContext with a context that does not have any wparams parameters.
+// DEPRECATED: Please use ErrorWithContextParams instead to ensure that all the wparams parameters that are set on the
+// context are included in the error.
 func Error(msg string, params ...Param) error {
-	return newWerror(msg, nil, params...)
+	return ErrorWithContextParams(context.Background(), msg, params...)
 }
 
-// ErrorWithContext returns a new error with the provided message and parameters
-// It also removes any stored params off the context and adds them to the error
+// ErrorWithContextParams returns a new error with the provided message and parameters. The returned error also includes any
+// wparams parameters that are stored in the context.
 //
 // The message should not contain any formatted parameters -- instead, use the SafeParam* or UnsafeParam* functions
 // to create error parameters.
@@ -24,30 +25,28 @@ func Error(msg string, params ...Param) error {
 //
 //	password, ok := config["password"]
 //	if !ok {
-//		return werror.ErrorWithContext(ctx, "configuration is missing password")
+//		return werror.ErrorWithContextParams(ctx, "configuration is missing password")
 //	}
 //
-func ErrorWithContext(ctx context.Context, msg string, params ...Param) error {
+func ErrorWithContextParams(ctx context.Context, msg string, params ...Param) error {
 	safe, unsafe := wparams.SafeAndUnsafeParamsFromContext(ctx)
 	fullParams := []Param{
 		SafeParams(safe),
 		UnsafeParams(unsafe),
 	}
 	fullParams = append(fullParams, params...)
-	return Error(msg, fullParams...)
+	return newWerror(msg, nil, params...)
 }
 
-// Wrap is identical to WrapWithContext except it does move params from the context to the error
-// DEPRECATED: Please use WrapWithContext instead to get full params
+// Wrap is identical to calling WrapWithContextParams with a context that does not have any wparams parameters.
+// DEPRECATED: Please use WrapWithContextParams instead to ensure that all the wparams parameters that are set on the
+// context are included in the error.
 func Wrap(err error, msg string, params ...Param) error {
-	if err == nil {
-		return nil
-	}
-	return newWerror(msg, err, params...)
+	return WrapWithContextParams(context.Background(), err, msg, params...)
 }
 
-// WrapWithContext returns a new error with the provided message and stores the provided error as its cause.
-// It also removes any stored params off the context and adds them to the error
+// WrapWithContextParams returns a new error with the provided message and stores the provided error as its cause.
+// The returned error also includes any wparams parameters that are stored in the context.
 //
 // The message should not contain any formatted parameters -- instead use the SafeParam* or UnsafeParam* functions
 // to create error parameters.
@@ -56,17 +55,20 @@ func Wrap(err error, msg string, params ...Param) error {
 //
 //	users, err := getUser(userID)
 //	if err != nil {
-//		return werror.Wrap(err, "failed to get user", werror.SafeParam("userId", userID))
+//		return werror.WrapWithContextParams(ctx, err, "failed to get user", werror.SafeParam("userId", userID))
 //	}
 //
-func WrapWithContext(ctx context.Context, err error, msg string, params ...Param) error {
+func WrapWithContextParams(ctx context.Context, err error, msg string, params ...Param) error {
+	if err == nil {
+		return nil
+	}
 	safe, unsafe := wparams.SafeAndUnsafeParamsFromContext(ctx)
 	fullParams := []Param{
 		SafeParams(safe),
 		UnsafeParams(unsafe),
 	}
 	fullParams = append(fullParams, params...)
-	return Wrap(err, msg, fullParams...)
+	return newWerror(msg, err, params...)
 }
 
 // Convert err to werror error.
