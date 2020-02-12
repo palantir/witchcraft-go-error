@@ -35,7 +35,7 @@ func ErrorWithContextParams(ctx context.Context, msg string, params ...Param) er
 		UnsafeParams(unsafe),
 	}
 	fullParams = append(fullParams, params...)
-	return newWerror(msg, nil, params...)
+	return newWerror(msg, nil, fullParams...)
 }
 
 // Wrap is identical to calling WrapWithContextParams with a context that does not have any wparams parameters.
@@ -68,7 +68,7 @@ func WrapWithContextParams(ctx context.Context, err error, msg string, params ..
 		UnsafeParams(unsafe),
 	}
 	fullParams = append(fullParams, params...)
-	return newWerror(msg, err, params...)
+	return newWerror(msg, err, fullParams...)
 }
 
 // Convert err to werror error.

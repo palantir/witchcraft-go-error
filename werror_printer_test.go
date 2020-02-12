@@ -1,6 +1,7 @@
 package werror
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,28 +23,28 @@ func TestErrorFormatting(t *testing.T) {
 	}{
 		{
 			name: "simple error",
-			err:  Error("simple_error"),
+			err:  ErrorWithContextParams(context.Background(), "simple_error"),
 			expectedRegex: "" +
 				"simple_error\n\n" +
 				stackTraceString,
 		},
 		{
 			name: "simple error with param",
-			err:  Error("simple_error", SafeParam("safeParamKey", "safeParamValue")),
+			err:  ErrorWithContextParams(context.Background(), "simple_error", SafeParam("safeParamKey", "safeParamValue")),
 			expectedRegex: "" +
 				"simple_error safeParamKey:safeParamValue\n\n" +
 				stackTraceString,
 		},
 		{
 			name: "simple error with many params",
-			err:  Error("simple_error", SafeParam("safeParamKey", "safeParamValue"), SafeParam("safeParamKey2", "safeParamValue2")),
+			err:  ErrorWithContextParams(context.Background(), "simple_error", SafeParam("safeParamKey", "safeParamValue"), SafeParam("safeParamKey2", "safeParamValue2")),
 			expectedRegex: "" +
 				"simple_error safeParamKey:safeParamValue, safeParamKey2:safeParamValue2\n\n" +
 				stackTraceString,
 		},
 		{
 			name: "simple wrapped error",
-			err:  Wrap(Error("simple_error"), "simple_error_2"),
+			err:  WrapWithContextParams(context.Background(), ErrorWithContextParams(context.Background(), "simple_error"), "simple_error_2"),
 			expectedRegex: "" +
 				"simple_error_2\n" +
 				"simple_error\n\n" +
@@ -51,7 +52,7 @@ func TestErrorFormatting(t *testing.T) {
 		},
 		{
 			name: "simple wrapped error with forced stacks",
-			err:  Wrap(Error("simple_error"), "simple_error_2"),
+			err:  WrapWithContextParams(context.Background(), ErrorWithContextParams(context.Background(), "simple_error"), "simple_error_2"),
 			expectedRegex: "" +
 				"simple_error_2\n" +
 				"simple_error\n\n" +
@@ -62,8 +63,8 @@ func TestErrorFormatting(t *testing.T) {
 		},
 		{
 			name: "double wrapped error with params",
-			err: Wrap(Wrap(
-				Error("inner0Message", SafeParam("inner0ParamKey", "inner0VParamValue"), SafeParam("inner0ParamKey1", "inner0VParamValue1"), SafeParam("inner0ParamKey2", "inner0VParamValue2")),
+			err: WrapWithContextParams(context.Background(), WrapWithContextParams(context.Background(),
+				ErrorWithContextParams(context.Background(), "inner0Message", SafeParam("inner0ParamKey", "inner0VParamValue"), SafeParam("inner0ParamKey1", "inner0VParamValue1"), SafeParam("inner0ParamKey2", "inner0VParamValue2")),
 				"inner1Message", SafeParam("inner1ParamKey", "inner1ValueKey")), "inner2Message"),
 			expectedRegex: "" +
 				"inner2Message\n" +

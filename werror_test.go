@@ -43,7 +43,7 @@ func TestError_Format(t *testing.T) {
 	}{
 		{
 			name: "new error without safe params",
-			err: werror.Error("message",
+			err: werror.ErrorWithContextParams(context.Background(), "message",
 				werror.UnsafeParam("unsafeKey", "unsafeKey"),
 			),
 			stringified: "message",
@@ -58,7 +58,7 @@ runtime.goexit
 		},
 		{
 			name: "new error with params",
-			err: werror.Error("message",
+			err: werror.ErrorWithContextParams(context.Background(), "message",
 				werror.UnsafeParam("unsafeKey", "unsafeKey"),
 				werror.SafeParam("safeKey", paramObject{
 					A: "public value A",
@@ -78,9 +78,9 @@ runtime.goexit
 		},
 		{
 			name: "error wrapped with errors and werror",
-			err: werror.Wrap(
+			err: werror.WrapWithContextParams(context.Background(),
 				errors.Wrap(
-					werror.Error(
+					werror.ErrorWithContextParams(context.Background(),
 						"root cause",
 						werror.UnsafeParam("unsafeRootKey", "unsafeRootValue"),
 						werror.SafeParam("safeRootKey", "safeRootValue"),
@@ -119,8 +119,8 @@ runtime.goexit
 		},
 		{
 			name: "wrapped with empty string",
-			err: werror.Wrap(
-				werror.Error("rootcause"),
+			err: werror.WrapWithContextParams(context.Background(),
+				werror.ErrorWithContextParams(context.Background(), "rootcause"),
 				"",
 			),
 			stringified: "rootcause",
@@ -142,8 +142,8 @@ runtime.goexit
 		},
 		{
 			name: "wrapped with empty string and params",
-			err: werror.Wrap(
-				werror.Error("rootcause"),
+			err: werror.WrapWithContextParams(context.Background(),
+				werror.ErrorWithContextParams(context.Background(), "rootcause"),
 				"",
 				werror.SafeParam("safeEmptyWrapperKey", "safeEmptyWrapperValue"),
 				werror.UnsafeParam("unsafeWrapperKey", "unsafeWrapperValue"),
@@ -167,7 +167,7 @@ runtime.goexit
 		},
 		{
 			name: "wrapped custom error with params",
-			err: werror.Wrap(
+			err: werror.WrapWithContextParams(context.Background(),
 				fmt.Errorf("customErr"),
 				"wrapper",
 				werror.SafeParam("safeWrapperKey", "safeWrapperValue"),
@@ -231,7 +231,7 @@ func TestParamsFromError(t *testing.T) {
 		},
 		{
 			name: "with the same safe and unsafe param key",
-			err: werror.ErrorWithContext(context.Background(), "err",
+			err: werror.ErrorWithContextParams(context.Background(), "err",
 				werror.SafeParam("key", "safeValue"),
 				werror.UnsafeParam("key", "unsafeValue")),
 			wantSafeParams: map[string]interface{}{},
@@ -241,7 +241,7 @@ func TestParamsFromError(t *testing.T) {
 		},
 		{
 			name: "with the same safe and unsafe param key (reverse order)",
-			err: werror.ErrorWithContext(context.Background(), "err",
+			err: werror.ErrorWithContextParams(context.Background(), "err",
 				werror.UnsafeParam("key", "unsafeValue"),
 				werror.SafeParam("key", "safeValue")),
 			wantSafeParams: map[string]interface{}{
@@ -251,9 +251,9 @@ func TestParamsFromError(t *testing.T) {
 		},
 		{
 			name: "with nested params",
-			err: werror.WrapWithContext(context.Background(),
+			err: werror.WrapWithContextParams(context.Background(),
 				errors.Wrap(
-					werror.ErrorWithContext(context.Background(),
+					werror.ErrorWithContextParams(context.Background(),
 						"root cause",
 						werror.UnsafeParam("unsafeRootKey", "unsafeRootValue"),
 						werror.SafeParam("safeRootKey", "safeRootValue"),
@@ -275,7 +275,7 @@ func TestParamsFromError(t *testing.T) {
 		},
 		{
 			name: "with empty safe and unsafe params param",
-			err: werror.ErrorWithContext(context.Background(), "error",
+			err: werror.ErrorWithContextParams(context.Background(), "error",
 				werror.SafeAndUnsafeParams(
 					map[string]interface{}{},
 					map[string]interface{}{},
@@ -286,7 +286,7 @@ func TestParamsFromError(t *testing.T) {
 		},
 		{
 			name: "with safe and unsafe params param",
-			err: werror.ErrorWithContext(context.Background(), "error",
+			err: werror.ErrorWithContextParams(context.Background(), "error",
 				werror.SafeAndUnsafeParams(
 					map[string]interface{}{
 						"safeKey": "safeVal",
@@ -329,22 +329,22 @@ func TestParamFromError(t *testing.T) {
 		err:  nil,
 	}, {
 		name: "error without param",
-		err:  werror.ErrorWithContext(context.Background(), "err"),
+		err:  werror.ErrorWithContextParams(context.Background(), "err"),
 	}, {
 		name: "error with safe param",
-		err: werror.ErrorWithContext(context.Background(), "err",
+		err: werror.ErrorWithContextParams(context.Background(), "err",
 			werror.SafeParam("key", "value")),
 		expectedValue: "value",
 		expectedSafe:  true,
 	}, {
 		name: "error with unsafe param",
-		err: werror.ErrorWithContext(context.Background(), "err",
+		err: werror.ErrorWithContextParams(context.Background(), "err",
 			werror.UnsafeParam("key", "value")),
 		expectedValue: "value",
 		expectedSafe:  false,
 	}, {
 		name: "error with duplicated param",
-		err: werror.ErrorWithContext(context.Background(), "err",
+		err: werror.ErrorWithContextParams(context.Background(), "err",
 			werror.UnsafeParam("key", "value1"),
 			werror.SafeParam("key", "value2"),
 			werror.SafeParam("key", "value3"),
@@ -370,7 +370,7 @@ func TestParamsFromError_FromParameterStorerObject(t *testing.T) {
 	}{
 		{
 			name: "empty parameterStorer",
-			inErr: werror.ErrorWithContext(context.Background(),
+			inErr: werror.ErrorWithContextParams(context.Background(),
 				"error",
 				werror.Params(testParameterStorerObject{}),
 			),
@@ -379,7 +379,7 @@ func TestParamsFromError_FromParameterStorerObject(t *testing.T) {
 		},
 		{
 			name: "parameterStorer with safe and unsafe params",
-			inErr: werror.ErrorWithContext(context.Background(),
+			inErr: werror.ErrorWithContextParams(context.Background(),
 				"error",
 				werror.Params(testParameterStorerObject{
 					safeParams: map[string]interface{}{
@@ -417,7 +417,7 @@ func TestParamsFromError_FromParameterStorerObject(t *testing.T) {
 		},
 		{
 			name: "werror with non-werror ParamStorer error cause",
-			inErr: werror.WrapWithContext(context.Background(),
+			inErr: werror.WrapWithContextParams(context.Background(),
 				&customParamStorerError{
 					msg: "error",
 					safeParams: map[string]interface{}{
@@ -474,10 +474,10 @@ func TestConvert(t *testing.T) {
 		err:  fmt.Errorf("custom error"),
 	}, {
 		name: "werror error",
-		err:  werror.ErrorWithContext(context.Background(), "werror error"),
+		err:  werror.ErrorWithContextParams(context.Background(), "werror error"),
 	}, {
 		name: "wrapped custom error",
-		err:  werror.WrapWithContext(context.Background(), fmt.Errorf("custom error"), "wrapped error"),
+		err:  werror.WrapWithContextParams(context.Background(), fmt.Errorf("custom error"), "wrapped error"),
 	}} {
 		t.Run(currCase.name, func(t *testing.T) {
 			if currCase.err == nil {
@@ -493,11 +493,11 @@ func TestConvert(t *testing.T) {
 }
 
 func TestWrap_NilErrorIsNil(t *testing.T) {
-	require.Nil(t, werror.WrapWithContext(context.Background(), nil, "<-- nil!"), "werror.WrapWithContext(context.Background(), )(nil) was not nil")
+	require.Nil(t, werror.WrapWithContextParams(context.Background(), nil, "<-- nil!"), "werror.WrapWithContext(context.Background(), )(nil) was not nil")
 }
 
 func TestRootCause(t *testing.T) {
-	werrorErr := werror.ErrorWithContext(context.Background(), "werror err")
+	werrorErr := werror.ErrorWithContextParams(context.Background(), "werror err")
 	customErr := fmt.Errorf("custom err")
 	for _, currCase := range []struct {
 		name      string
@@ -514,7 +514,7 @@ func TestRootCause(t *testing.T) {
 	}, {
 		name:      "wrapped werror error",
 		rootCause: werrorErr,
-		err:       werror.WrapWithContext(context.Background(), werrorErr, "wrap", werror.SafeParam("safeKey", "safeVal")),
+		err:       werror.WrapWithContextParams(context.Background(), werrorErr, "wrap", werror.SafeParam("safeKey", "safeVal")),
 	}, {
 		name:      "converted werror error",
 		rootCause: werrorErr,
@@ -526,7 +526,7 @@ func TestRootCause(t *testing.T) {
 	}, {
 		name:      "wrapped custom error",
 		rootCause: customErr,
-		err:       werror.WrapWithContext(context.Background(), customErr, "wrap", werror.SafeParam("safeKey", "safeVal")),
+		err:       werror.WrapWithContextParams(context.Background(), customErr, "wrap", werror.SafeParam("safeKey", "safeVal")),
 	}, {
 		name:      "converted custom error",
 		rootCause: customErr,
@@ -543,7 +543,7 @@ func TestErrorPullsOutParamsFromContext(t *testing.T) {
 	safe := map[string]interface{}{"safeKey": "safeValue"}
 	unsafe := map[string]interface{}{"unsafeKey": "unsafeValue"}
 	ctx = wparams.ContextWithSafeAndUnsafeParams(ctx, safe, unsafe)
-	err := werror.ErrorWithContext(ctx, "error", werror.SafeParam("anotherSafeKey", "anotherSafeValue"), werror.UnsafeParam("anotherUnsafeKey", "anotherUnsafeValue"))
+	err := werror.ErrorWithContextParams(ctx, "error", werror.SafeParam("anotherSafeKey", "anotherSafeValue"), werror.UnsafeParam("anotherUnsafeKey", "anotherUnsafeValue"))
 	safeFromError, unSafeFromError := werror.ParamsFromError(err)
 	assert.Equal(t, map[string]interface{}{"safeKey": "safeValue", "anotherSafeKey": "anotherSafeValue"}, safeFromError)
 	assert.Equal(t, map[string]interface{}{"unsafeKey": "unsafeValue", "anotherUnsafeKey": "anotherUnsafeValue"}, unSafeFromError)
@@ -555,7 +555,7 @@ func TestWrapPullsOutParamsFromContext(t *testing.T) {
 	unsafe := map[string]interface{}{"unsafeKey": "unsafeValue"}
 	ctx = wparams.ContextWithSafeAndUnsafeParams(ctx, safe, unsafe)
 	rawErr := werror.Error("err", werror.SafeParam("anotherSafeKey", "anotherSafeValue"), werror.UnsafeParam("anotherUnsafeKey", "anotherUnsafeValue"))
-	err := werror.WrapWithContext(ctx, rawErr, "bad", werror.SafeParam("aThirdSafeKey", "aThirdSafeValue"), werror.UnsafeParam("aThirdUnsafeKey", "aThirdUnsafeValue"))
+	err := werror.WrapWithContextParams(ctx, rawErr, "bad", werror.SafeParam("aThirdSafeKey", "aThirdSafeValue"), werror.UnsafeParam("aThirdUnsafeKey", "aThirdUnsafeValue"))
 	safeFromError, unSafeFromError := werror.ParamsFromError(err)
 	assert.Equal(t, map[string]interface{}{"safeKey": "safeValue", "anotherSafeKey": "anotherSafeValue", "aThirdSafeKey": "aThirdSafeValue"}, safeFromError)
 	assert.Equal(t, map[string]interface{}{"unsafeKey": "unsafeValue", "anotherUnsafeKey": "anotherUnsafeValue", "aThirdUnsafeKey": "aThirdUnsafeValue"}, unSafeFromError)
