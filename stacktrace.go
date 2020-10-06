@@ -7,6 +7,10 @@ import (
 	"github.com/palantir/witchcraft-go-error/internal/errors"
 )
 
+type StackTracer interface {
+	Stack() fmt.Formatter
+}
+
 func callers() *stack {
 	const depth = 32
 	var pcs [depth]uintptr

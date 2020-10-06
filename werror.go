@@ -88,7 +88,7 @@ func Convert(err error) error {
 		return err
 	}
 	switch err.(type) {
-	case *werror:
+	case Werror:
 		return err
 	default:
 		return newWerror("", err)
@@ -100,7 +100,7 @@ func Convert(err error) error {
 // Traverses the cause hierarchy until it reaches an error which has no cause and returns that error.
 func RootCause(err error) error {
 	for {
-		causer, ok := err.(causer)
+		causer, ok := err.(Causer)
 		if !ok {
 			return err
 		}
@@ -114,7 +114,7 @@ func RootCause(err error) error {
 
 // ParamsFromError returns all of the safe and unsafe parameters stored in the provided error.
 //
-// If the error implements the causer interface, then the returned parameters will include all of the parameters stored
+// If the error implements the Causer interface, then the returned parameters will include all of the parameters stored
 // in the causes as well.
 //
 // All of the keys and parameters of the map are flattened.
@@ -155,7 +155,7 @@ func ParamFromError(err error, key string) (value interface{}, safe bool) {
 func visitErrorParams(err error, visitor func(k string, v interface{}, safe bool)) {
 	allErrs := []error{err}
 	for currErr := err; ; {
-		causer, ok := currErr.(causer)
+		causer, ok := currErr.(Causer)
 		if !ok || causer.Cause() == nil {
 			// current error does not have a cause
 			break
@@ -184,6 +184,17 @@ func visitErrorParams(err error, visitor func(k string, v interface{}, safe bool
 	}
 }
 
+// Werror is an error type consisting of an underlying error, stacktrace, underlying causes, and safe and unsafe
+// params associated with that error.
+type Werror interface {
+	error
+	Causer
+	StackTracer
+	wparams.ParamStorer
+
+	Message() string
+}
+
 // werror is an error type consisting of an underlying error and safe and unsafe params associated with that error.
 type werror struct {
 	message string
@@ -197,8 +208,8 @@ type paramValue struct {
 	value interface{}
 }
 
-// causer interface is compatible with the interface used by pkg/errors.
-type causer interface {
+// Causer interface is compatible with the interface used by pkg/errors.
+type Causer interface {
 	Cause() error
 }
 
@@ -230,6 +241,16 @@ func (e *werror) Error() string {
 // Cause returns the underlying cause of this error or nil if there is none.
 func (e *werror) Cause() error {
 	return e.cause
+}
+
+// stack returns the Stacktracer for this error or nil if there is none.
+func (e *werror) Stack() fmt.Formatter {
+	return e.stack
+}
+
+// Message returns the message string for this error or nil if there is none.
+func (e *werror) Message() string {
+	return e.message
 }
 
 func (e *werror) SafeParams() map[string]interface{} {
