@@ -237,12 +237,12 @@ func (e *werror) Cause() error {
 	return e.cause
 }
 
-// stack returns the Stacktracer for this error or nil if there is none.
+// StackTrace returns the Stacktracer for this error or nil if there is none.
 func (e *werror) StackTrace() StackTrace {
 	return e.stack
 }
 
-// Message returns the message string for this error or nil if there is none.
+// Message returns the message string for this error.
 func (e *werror) Message() string {
 	return e.message
 }
@@ -272,7 +272,8 @@ func (e *werror) Format(state fmt.State, verb rune) {
 	FormatWerror(e, state, verb)
 }
 
-// FormatWerror formats a Werror using the provided format state.
+// FormatWerror formats a Werror using the provided format state. This is a utility method that can
+// be used by other implementations of Werror.
 func FormatWerror(err Werror, state fmt.State, verb rune) {
 	if verb == 'v' && state.Flag('+') {
 		// Multi-line extra verbose format starts with cause first followed up by current error metadata.
