@@ -7,11 +7,18 @@ import (
 	"github.com/palantir/witchcraft-go-error/internal/errors"
 )
 
-type StackTracer interface {
-	Stack() fmt.Formatter
+var _ StackTrace = (*stack)(nil)
+
+type StackTrace interface {
+	fmt.Formatter
 }
 
-func callers() *stack {
+type StackTracer interface {
+	StackTrace() StackTrace
+}
+
+// NewStackTrace creates a new StackTrace, constructed by collecting program counters from runtime callers.
+func NewStackTrace() StackTrace {
 	const depth = 32
 	var pcs [depth]uintptr
 	// only modification is changing "3" to "4" here. Because the stack trace is always taken by the werror package,

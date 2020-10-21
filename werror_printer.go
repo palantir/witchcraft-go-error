@@ -100,5 +100,5 @@ func writeStack(err Werror, buffer *bytes.Buffer, outputEveryCallingStack bool) 
 			return
 		}
 	}
-	buffer.WriteString(fmt.Sprintf("%+v", err.Stack()))
+	buffer.WriteString(fmt.Sprintf("%+v", err.StackTrace()))
 }

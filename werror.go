@@ -8,6 +8,8 @@ import (
 	wparams "github.com/palantir/witchcraft-go-params"
 )
 
+var _ Werror = (*werror)(nil)
+
 // Error is identical to calling ErrorWithContext with a context that does not have any wparams parameters.
 // DEPRECATED: Please use ErrorWithContextParams instead to ensure that all the wparams parameters that are set on the
 // context are included in the error.
@@ -164,22 +166,13 @@ func visitErrorParams(err error, visitor func(k string, v interface{}, safe bool
 		currErr = causer.Cause()
 	}
 	for _, currErr := range allErrs {
-		we, ok := currErr.(*werror)
-		if !ok {
-			// if error is not a *werror but is a ParamStorer, then use the SafeParams() and UnsafeParams() functions to
-			// extract parameters. Need to handle the *werror case separately to prevent infinite recursion.
-			if ps, ok := currErr.(wparams.ParamStorer); ok {
-				for k, v := range ps.SafeParams() {
-					visitor(k, v, true)
-				}
-				for k, v := range ps.UnsafeParams() {
-					visitor(k, v, false)
-				}
+		if ps, ok := currErr.(wparams.ParamStorer); ok {
+			for k, v := range ps.SafeParams() {
+				visitor(k, v, true)
 			}
-			continue
-		}
-		for k, v := range we.params {
-			visitor(k, v.value, v.safe)
+			for k, v := range ps.UnsafeParams() {
+				visitor(k, v, false)
+			}
 		}
 	}
 }
@@ -188,6 +181,7 @@ func visitErrorParams(err error, visitor func(k string, v interface{}, safe bool
 // params associated with that error.
 type Werror interface {
 	error
+	fmt.Formatter
 	Causer
 	StackTracer
 	wparams.ParamStorer
@@ -199,7 +193,7 @@ type Werror interface {
 type werror struct {
 	message string
 	cause   error
-	stack   *stack
+	stack   StackTrace
 	params  map[string]paramValue
 }
 
@@ -217,7 +211,7 @@ func newWerror(message string, cause error, params ...Param) error {
 	we := &werror{
 		message: message,
 		cause:   cause,
-		stack:   callers(),
+		stack:   NewStackTrace(),
 		params:  make(map[string]paramValue),
 	}
 	for _, p := range params {
@@ -244,7 +238,7 @@ func (e *werror) Cause() error {
 }
 
 // stack returns the Stacktracer for this error or nil if there is none.
-func (e *werror) Stack() fmt.Formatter {
+func (e *werror) StackTrace() StackTrace {
 	return e.stack
 }
 
@@ -254,89 +248,102 @@ func (e *werror) Message() string {
 }
 
 func (e *werror) SafeParams() map[string]interface{} {
-	safe, _ := ParamsFromError(e)
-	return safe
-}
-
-func (e *werror) UnsafeParams() map[string]interface{} {
-	_, unsafe := ParamsFromError(e)
-	return unsafe
-}
-
-// Format formats the error using the provided format state. Delegates to stored error.
-func (e *werror) Format(state fmt.State, verb rune) {
-	if verb == 'v' && state.Flag('+') {
-		// Multi-line extra verbose format starts with cause first followed up by current error metadata.
-		e.formatCause(state, verb)
-		e.formatMessage(state, verb)
-		e.formatParameters(state, verb)
-		e.formatStack(state, verb)
-	} else {
-		e.formatMessage(state, verb)
-		e.formatParameters(state, verb)
-		e.formatStack(state, verb)
-		e.formatCause(state, verb)
-	}
-}
-
-func (e *werror) formatMessage(state fmt.State, verb rune) {
-	if e.message == "" {
-		return
-	}
-	switch verb {
-	case 's', 'q', 'v':
-		_, _ = fmt.Fprint(state, e.message)
-	}
-}
-
-func (e *werror) formatParameters(state fmt.State, verb rune) {
-	safe := make(map[string]interface{}, len(e.params))
+	safe := make(map[string]interface{})
 	for k, v := range e.params {
 		if v.safe {
 			safe[k] = v.value
 		}
 	}
-	if len(safe) == 0 {
+	return safe
+}
+
+func (e *werror) UnsafeParams() map[string]interface{} {
+	unsafe := make(map[string]interface{})
+	for k, v := range e.params {
+		if !v.safe {
+			unsafe[k] = v.value
+		}
+	}
+	return unsafe
+}
+
+// Format formats the error using the provided format state. Delegates to stored error.
+func (e *werror) Format(state fmt.State, verb rune) {
+	FormatWerror(e, state, verb)
+}
+
+// FormatWerror formats a Werror using the provided format state.
+func FormatWerror(err Werror, state fmt.State, verb rune) {
+	if verb == 'v' && state.Flag('+') {
+		// Multi-line extra verbose format starts with cause first followed up by current error metadata.
+		formatCause(err, state, verb)
+		formatMessage(err, state, verb)
+		formatParameters(err, state, verb)
+		formatStack(err, state, verb)
+	} else {
+		formatMessage(err, state, verb)
+		formatParameters(err, state, verb)
+		formatStack(err, state, verb)
+		formatCause(err, state, verb)
+	}
+}
+
+func formatMessage(err Werror, state fmt.State, verb rune) {
+	if err.Message() == "" {
 		return
+	}
+	switch verb {
+	case 's', 'q', 'v':
+		_, _ = fmt.Fprint(state, err.Message())
+	}
+}
+
+func formatParameters(err Werror, state fmt.State, verb rune) {
+	if len(err.SafeParams()) == 0 {
+		return
+	}
+	safe := make(map[string]interface{}, len(err.SafeParams()))
+	for k, v := range err.SafeParams() {
+		safe[k] = v
 	}
 	if verb != 'v' {
 		return
 	}
-	if e.message != "" {
+	if err.Message() != "" {
 		// Whitespace before the message.
 		_, _ = fmt.Fprint(state, " ")
 	}
 	_, _ = fmt.Fprintf(state, "%+v", safe)
 }
 
-func (e *werror) formatStack(state fmt.State, verb rune) {
-	if e.stack == nil {
+func formatStack(err Werror, state fmt.State, verb rune) {
+	if err.StackTrace() == nil {
 		return
 	}
 	if verb != 'v' || !state.Flag('+') {
 		return
 	}
-	e.stack.Format(state, verb)
+	err.StackTrace().Format(state, verb)
 }
 
-func (e *werror) formatCause(state fmt.State, verb rune) {
-	if e.cause == nil {
+func formatCause(err Werror, state fmt.State, verb rune) {
+	if err.Cause() == nil {
 		return
 	}
 	var prefix string
-	if e.message != "" || (verb == 'v' && len(e.params) > 0) {
+	if err.Message() != "" || (verb == 'v' && len(err.SafeParams()) > 0) {
 		prefix = ": "
 	}
 	switch verb {
 	case 'v':
 		if state.Flag('+') {
-			_, _ = fmt.Fprintf(state, "%+v\n", e.cause)
+			_, _ = fmt.Fprintf(state, "%+v\n", err.Cause())
 		} else {
-			_, _ = fmt.Fprintf(state, "%s%v", prefix, e.cause)
+			_, _ = fmt.Fprintf(state, "%s%v", prefix, err.Cause())
 		}
 	case 's':
-		_, _ = fmt.Fprintf(state, "%s%s", prefix, e.cause)
+		_, _ = fmt.Fprintf(state, "%s%s", prefix, err.Cause())
 	case 'q':
-		_, _ = fmt.Fprintf(state, "%s%q", prefix, e.cause)
+		_, _ = fmt.Fprintf(state, "%s%q", prefix, err.Cause())
 	}
 }
