@@ -269,12 +269,12 @@ func (e *werror) UnsafeParams() map[string]interface{} {
 
 // Format formats the error using the provided format state. Delegates to stored error.
 func (e *werror) Format(state fmt.State, verb rune) {
-	FormatWerror(e, state, verb)
+	Format(e, state, verb)
 }
 
-// FormatWerror formats a Werror using the provided format state. This is a utility method that can
+// Format formats a Werror using the provided format state. This is a utility method that can
 // be used by other implementations of Werror.
-func FormatWerror(err Werror, state fmt.State, verb rune) {
+func Format(err Werror, state fmt.State, verb rune) {
 	if verb == 'v' && state.Flag('+') {
 		// Multi-line extra verbose format starts with cause first followed up by current error metadata.
 		formatCause(err, state, verb)
