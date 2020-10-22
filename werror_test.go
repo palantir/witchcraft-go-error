@@ -560,3 +560,25 @@ func TestWrapPullsOutParamsFromContext(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{"safeKey": "safeValue", "anotherSafeKey": "anotherSafeValue", "aThirdSafeKey": "aThirdSafeValue"}, safeFromError)
 	assert.Equal(t, map[string]interface{}{"unsafeKey": "unsafeValue", "anotherUnsafeKey": "anotherUnsafeValue", "aThirdUnsafeKey": "aThirdUnsafeValue"}, unSafeFromError)
 }
+
+func TestSafeParams(t *testing.T) {
+	err := werror.Error("first", werror.SafeParam("key", "value"))
+	err2 := werror.Wrap(err, "second", werror.SafeParam("key2", "value2"))
+	err3 := werror.Wrap(err2, "second", werror.SafeParam("key3", "value3"))
+	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2"}, err2.(werror.Werror).SafeParams())
+	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err3.(werror.Werror).SafeParams())
+
+	err4 := werror.Wrap(err3, "second", werror.SafeParam("key", "value4"))
+	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err4.(werror.Werror).SafeParams())
+}
+
+func TestUnsafeParams(t *testing.T) {
+	err := werror.Error("first", werror.UnsafeParam("key", "value"))
+	err2 := werror.Wrap(err, "second", werror.UnsafeParam("key2", "value2"))
+	err3 := werror.Wrap(err2, "second", werror.UnsafeParam("key3", "value3"))
+	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2"}, err2.(werror.Werror).UnsafeParams())
+	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err3.(werror.Werror).UnsafeParams())
+
+	err4 := werror.Wrap(err3, "second", werror.UnsafeParam("key", "value4"))
+	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err4.(werror.Werror).UnsafeParams())
+}

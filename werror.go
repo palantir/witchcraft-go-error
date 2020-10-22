@@ -127,13 +127,15 @@ func RootCause(err error) error {
 func ParamsFromError(err error) (safeParams map[string]interface{}, unsafeParams map[string]interface{}) {
 	safeParams = make(map[string]interface{})
 	unsafeParams = make(map[string]interface{})
-	visitErrorParams(err, func(k string, v interface{}, safe bool) {
-		if safe {
-			safeParams[k] = v
-		} else {
-			unsafeParams[k] = v
-		}
-	})
+	if err != nil {
+		visitErrorParams(err, func(k string, v interface{}, safe bool) {
+			if safe {
+				safeParams[k] = v
+			} else {
+				unsafeParams[k] = v
+			}
+		})
+	}
 	return safeParams, unsafeParams
 }
 
@@ -247,21 +249,29 @@ func (e *werror) Message() string {
 	return e.message
 }
 
+// SafeParams returns params from this error and any underlying causes. If the error and its causes
+// contain multiple values for the same key, the most specific (deepest) value will be returned.
 func (e *werror) SafeParams() map[string]interface{} {
-	safe := make(map[string]interface{})
+	safe, _ := ParamsFromError(e.cause)
 	for k, v := range e.params {
 		if v.safe {
-			safe[k] = v.value
+			if _, exists := safe[k]; !exists {
+				safe[k] = v.value
+			}
 		}
 	}
 	return safe
 }
 
+// UnsafeParams returns params from this error and any underlying causes. If the error and its causes
+// contain multiple values for the same key, the most specific (deepest) value will be returned.
 func (e *werror) UnsafeParams() map[string]interface{} {
-	unsafe := make(map[string]interface{})
+	_, unsafe := ParamsFromError(e.cause)
 	for k, v := range e.params {
 		if !v.safe {
-			unsafe[k] = v.value
+			if _, exists := unsafe[k]; !exists {
+				unsafe[k] = v.value
+			}
 		}
 	}
 	return unsafe
