@@ -279,21 +279,28 @@ func (e *werror) UnsafeParams() map[string]interface{} {
 
 // Format formats the error using the provided format state. Delegates to stored error.
 func (e *werror) Format(state fmt.State, verb rune) {
-	Format(e, state, verb)
+	safe := make(map[string]interface{})
+	for k, v := range e.params {
+		if v.safe {
+			safe[k] = v.value
+		}
+	}
+	Format(e, safe, state, verb)
 }
 
 // Format formats a Werror using the provided format state. This is a utility method that can
-// be used by other implementations of Werror.
-func Format(err Werror, state fmt.State, verb rune) {
+// be used by other implementations of Werror. The safeParams argument is expected to include
+// safe params for this error only, not for any underlying causes.
+func Format(err Werror, safeParams map[string]interface{}, state fmt.State, verb rune) {
 	if verb == 'v' && state.Flag('+') {
 		// Multi-line extra verbose format starts with cause first followed up by current error metadata.
 		formatCause(err, state, verb)
 		formatMessage(err, state, verb)
-		formatParameters(err, state, verb)
+		formatParameters(err, safeParams, state, verb)
 		formatStack(err, state, verb)
 	} else {
 		formatMessage(err, state, verb)
-		formatParameters(err, state, verb)
+		formatParameters(err, safeParams, state, verb)
 		formatStack(err, state, verb)
 		formatCause(err, state, verb)
 	}
@@ -309,13 +316,9 @@ func formatMessage(err Werror, state fmt.State, verb rune) {
 	}
 }
 
-func formatParameters(err Werror, state fmt.State, verb rune) {
-	if len(err.SafeParams()) == 0 {
+func formatParameters(err Werror, safeParams map[string]interface{}, state fmt.State, verb rune) {
+	if len(safeParams) == 0 {
 		return
-	}
-	safe := make(map[string]interface{}, len(err.SafeParams()))
-	for k, v := range err.SafeParams() {
-		safe[k] = v
 	}
 	if verb != 'v' {
 		return
@@ -324,7 +327,7 @@ func formatParameters(err Werror, state fmt.State, verb rune) {
 		// Whitespace before the message.
 		_, _ = fmt.Fprint(state, " ")
 	}
-	_, _ = fmt.Fprintf(state, "%+v", safe)
+	_, _ = fmt.Fprintf(state, "%+v", safeParams)
 }
 
 func formatStack(err Werror, state fmt.State, verb rune) {
