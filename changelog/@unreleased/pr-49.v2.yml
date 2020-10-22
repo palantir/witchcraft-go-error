@@ -1,4 +1,4 @@
-type: Feature
+type: feature
 feature:
   description: Export public Werror interface, enabling additional implementations (e.g., conjure-go) that work seamlessly with the existing w-g-e ecosystem.
   links:

@@ -568,6 +568,8 @@ func TestSafeParams(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2"}, err2.(werror.Werror).SafeParams())
 	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err3.(werror.Werror).SafeParams())
 
+	// The deepest (innermost) error's param key assignment should win, so overriding the key on the outermost
+	// wrapping error should be a no-op.
 	err4 := werror.Wrap(err3, "second", werror.SafeParam("key", "value4"))
 	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err4.(werror.Werror).SafeParams())
 }
@@ -579,6 +581,8 @@ func TestUnsafeParams(t *testing.T) {
 	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2"}, err2.(werror.Werror).UnsafeParams())
 	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err3.(werror.Werror).UnsafeParams())
 
+	// The deepest (innermost) error's param key assignment should win, so overriding the key on the outermost
+	// wrapping error should be a no-op.
 	err4 := werror.Wrap(err3, "second", werror.UnsafeParam("key", "value4"))
 	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err4.(werror.Werror).UnsafeParams())
 }

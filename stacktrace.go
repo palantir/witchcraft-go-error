@@ -30,6 +30,17 @@ func NewStackTrace() StackTrace {
 	return &st
 }
 
+// NewStackTraceWithSkip creates a new StackTrace that skips an additional `skip` stack frames.
+func NewStackTraceWithSkip(skip int) StackTrace {
+	const depth = 32
+	var pcs [depth]uintptr
+	// only modification is changing "3" to "4" here. Because the stack trace is always taken by the werror package,
+	// omit one extra frame (caller should not see werror package as part of the output stack).
+	n := runtime.Callers(skip+4, pcs[:])
+	var st stack = pcs[0:n]
+	return &st
+}
+
 // stack represents a stack of program counters.
 type stack []uintptr
 
