@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: 'fix: Handle nil ParamStorer'
+  links:
+  - https://github.com/palantir/witchcraft-go-error/pull/53
