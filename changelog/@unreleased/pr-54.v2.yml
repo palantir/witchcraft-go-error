@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix frame skips in NewStackTrace and NewStackTraceWithSkips
+  links:
+  - https://github.com/palantir/witchcraft-go-error/pull/54
