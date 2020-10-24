@@ -586,3 +586,35 @@ func TestUnsafeParams(t *testing.T) {
 	err4 := werror.Wrap(err3, "second", werror.UnsafeParam("key", "value4"))
 	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err4.(werror.Werror).UnsafeParams())
 }
+
+func TestNewStackTrace(t *testing.T) {
+	stack := testStackTraceFn()
+	printed := fmt.Sprintf("%+v", stack)
+	assert.Contains(t, printed, "TestNewStackTrace")
+	assert.NotContains(t, printed, "testStackTraceFn")
+}
+
+func TestNewStackTraceWithSkip(t *testing.T) {
+	stack := testStackTraceWithSkipFn(0)
+	printed := fmt.Sprintf("%+v", stack)
+	assert.Contains(t, printed, "TestNewStackTraceWithSkip")
+	assert.NotContains(t, printed, "testStackTraceFn")
+
+	stack = testStackTraceWithSkipFn(1)
+	printed = fmt.Sprintf("%+v", stack)
+	assert.NotContains(t, printed, "TestNewStackTraceWithSkip")
+	assert.NotContains(t, printed, "testStackTraceWithSkipFn")
+
+	stack = testStackTraceWithSkipFn(-1)
+	printed = fmt.Sprintf("%+v", stack)
+	assert.Contains(t, printed, "TestNewStackTraceWithSkip")
+	assert.Contains(t, printed, "testStackTraceWithSkipFn")
+}
+
+func testStackTraceFn() werror.StackTrace {
+	return werror.NewStackTrace()
+}
+
+func testStackTraceWithSkipFn(skip int) werror.StackTrace {
+	return werror.NewStackTraceWithSkip(skip)
+}
