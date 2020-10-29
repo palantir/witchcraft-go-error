@@ -619,44 +619,35 @@ func testStackTraceWithSkipFn(skip int) werror.StackTrace {
 	return werror.NewStackTraceWithSkip(skip)
 }
 
-func TestErrorCreatorStacktrace(t *testing.T) {
+func TestErrorConstructorStacktrace(t *testing.T) {
 	for _, tc := range []struct {
-		constructorName string
-		constructorFn   func() error
+		constructor string
+		err         error
 	}{
 		{
-			constructorName: "Error",
-			constructorFn: func() error {
-				return werror.Error("test")
-			},
+			constructor: "Error",
+			err:         werror.Error("test"),
 		},
 		{
-			constructorName: "ErrorWithContextParams",
-			constructorFn: func() error {
-				return werror.ErrorWithContextParams(context.Background(), "test")
-			},
+			constructor: "ErrorWithContextParams",
+			err:         werror.ErrorWithContextParams(context.Background(), "test"),
 		},
 		{
-			constructorName: "Wrap",
-			constructorFn: func() error {
-				return werror.Wrap(werror.Error("wrapped"), "test")
-			},
+			constructor: "Wrap",
+			err:         werror.Wrap(werror.Error("wrapped"), "test"),
 		},
 		{
-			constructorName: "WrapWithContextParams",
-			constructorFn: func() error {
-				return werror.WrapWithContextParams(context.Background(), werror.Error("wrapped"), "test")
-			},
+			constructor: "WrapWithContextParams",
+			err:         werror.WrapWithContextParams(context.Background(), werror.Error("wrapped"), "test"),
 		},
 	} {
-		t.Run(tc.constructorName, func(t *testing.T) {
-			err := tc.constructorFn()
-			werr, ok := err.(werror.Werror)
+		t.Run(tc.constructor, func(t *testing.T) {
+			werr, ok := tc.err.(werror.Werror)
 			assert.True(t, ok)
 			printedStack := fmt.Sprintf("%+v", werr.StackTrace())
 			fmt.Println(printedStack)
-			assert.Contains(t, printedStack, "TestErrorCreatorStacktrace")
-			assert.NotContains(t, printedStack, "witchcraft-go-error."+tc.constructorName)
+			assert.Contains(t, printedStack, "TestErrorConstructorStacktrace")
+			assert.NotContains(t, printedStack, "witchcraft-go-error."+tc.constructor)
 		})
 	}
 }
