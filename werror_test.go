@@ -378,6 +378,15 @@ func TestParamsFromError_FromParameterStorerObject(t *testing.T) {
 			wantUnsafeParams: map[string]interface{}{},
 		},
 		{
+			name: "nil parameterStorer",
+			inErr: werror.ErrorWithContextParams(context.Background(),
+				"error",
+				werror.Params(nil),
+			),
+			wantSafeParams:   map[string]interface{}{},
+			wantUnsafeParams: map[string]interface{}{},
+		},
+		{
 			name: "parameterStorer with safe and unsafe params",
 			inErr: werror.ErrorWithContextParams(context.Background(),
 				"error",
