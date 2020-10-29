@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix stack traces for Error and Wrap constructors by calling newWerror directly, which correctly avoids including the Error or Wrap function in the stacktrace.
+  links:
+  - https://github.com/palantir/witchcraft-go-error/pull/55
