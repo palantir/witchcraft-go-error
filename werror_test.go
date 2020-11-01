@@ -501,8 +501,12 @@ func TestConvert(t *testing.T) {
 	}
 }
 
-func TestWrap_NilErrorIsNil(t *testing.T) {
+func TestWrapWithContextParams_NilErrorIsNil(t *testing.T) {
 	require.Nil(t, werror.WrapWithContextParams(context.Background(), nil, "<-- nil!"), "werror.WrapWithContext(context.Background(), )(nil) was not nil")
+}
+
+func TestWrap_NilErrorIsNil(t *testing.T) {
+	require.Nil(t, werror.Wrap(nil, "<-- nil"))
 }
 
 func TestRootCause(t *testing.T) {

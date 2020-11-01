@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: Fix Wrap to return nil if err is nil
+  links:
+  - https://github.com/palantir/witchcraft-go-error/pull/57
