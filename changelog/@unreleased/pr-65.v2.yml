@@ -1,0 +1,5 @@
+type: improvement
+improvement:
+  description: Errors returned by `werror.Wrap*` functions now implement the `Unwrap() error` function, which allows them to be unwrapped properly by the Go `errors` package for operations such as `errors.Is` and `errors.As`.
+  links:
+  - https://github.com/palantir/witchcraft-go-error/pull/65
