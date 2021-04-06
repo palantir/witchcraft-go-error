@@ -2,11 +2,12 @@ package werror_test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
 	werror "github.com/palantir/witchcraft-go-error"
-	"github.com/palantir/witchcraft-go-error/internal/errors"
+	internalerrors "github.com/palantir/witchcraft-go-error/internal/errors"
 	wparams "github.com/palantir/witchcraft-go-params"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -79,7 +80,7 @@ runtime.goexit
 		{
 			name: "error wrapped with errors and werror",
 			err: werror.WrapWithContextParams(context.Background(),
-				errors.Wrap(
+				internalerrors.Wrap(
 					werror.ErrorWithContextParams(context.Background(),
 						"root cause",
 						werror.UnsafeParam("unsafeRootKey", "unsafeRootValue"),
@@ -252,7 +253,7 @@ func TestParamsFromError(t *testing.T) {
 		{
 			name: "with nested params",
 			err: werror.WrapWithContextParams(context.Background(),
-				errors.Wrap(
+				internalerrors.Wrap(
 					werror.ErrorWithContextParams(context.Background(),
 						"root cause",
 						werror.UnsafeParam("unsafeRootKey", "unsafeRootValue"),
@@ -663,4 +664,17 @@ func TestErrorConstructorStacktrace(t *testing.T) {
 			assert.NotContains(t, printedStack, "witchcraft-go-error."+tc.constructor)
 		})
 	}
+}
+
+// TestGoErrorWrapping verifies that the wrapping performed by werror is compatible with the builtin Go error package's
+// wrapping mechanism.
+func TestGoErrorWrapping(t *testing.T) {
+	sentinelError := errors.New("sentinel error")
+	wrappedErr := werror.WrapWithContextParams(context.Background(), sentinelError, "Error that wraps sentinel")
+	// "errors.Is" should return true because sentinelError is wrapped
+	assert.True(t, errors.Is(wrappedErr, sentinelError))
+
+	doubleWrappedErr := werror.WrapWithContextParams(context.Background(), wrappedErr, "Wrap warpped error")
+	// "errors.Is" should return true because sentinelError is wrapped 2 levels deep
+	assert.True(t, errors.Is(doubleWrappedErr, sentinelError))
 }
