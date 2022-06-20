@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/palantir/witchcraft-go-params v1.6.0
-	github.com/stretchr/testify v1.7.3
+	github.com/stretchr/testify v1.7.4
 )
 
 require (
