@@ -1,8 +1,8 @@
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/palantir/witchcraft-go-params v1.10.0 h1:YpJqJv+4a6R5KeJGYBaiEnJzL3g6OUJ+Qm5BXqxMRxY=
-github.com/palantir/witchcraft-go-params v1.10.0/go.mod h1:fzRluN4z+wo6JXZFeIjc/VbOzUBPwvIqtMdnoDwIZsY=
+github.com/palantir/witchcraft-go-params v1.11.0 h1:e/mlH+ecC4wGWvvyCX9IvaysAbHZvwCGdh+FS8DLbJM=
+github.com/palantir/witchcraft-go-params v1.11.0/go.mod h1:fzRluN4z+wo6JXZFeIjc/VbOzUBPwvIqtMdnoDwIZsY=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
