@@ -3,7 +3,7 @@ module github.com/palantir/witchcraft-go-error
 go 1.19
 
 require (
-	github.com/palantir/witchcraft-go-params v1.14.0
+	github.com/palantir/witchcraft-go-params v1.15.0
 	github.com/stretchr/testify v1.8.1
 )
 
