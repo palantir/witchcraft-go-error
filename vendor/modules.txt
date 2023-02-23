@@ -1,7 +1,7 @@
 # github.com/davecgh/go-spew v1.1.1
 ## explicit
 github.com/davecgh/go-spew/spew
-# github.com/palantir/witchcraft-go-params v1.17.0
+# github.com/palantir/witchcraft-go-params v1.18.0
 ## explicit; go 1.19
 github.com/palantir/witchcraft-go-params
 # github.com/pmezard/go-difflib v1.0.0
