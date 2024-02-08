@@ -1,7 +1,7 @@
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/palantir/witchcraft-go-params v1.30.0 h1:czt2L6VT7m7LplBquezTYrFcwChEmD8TpkL6EOB2iRk=
-github.com/palantir/witchcraft-go-params v1.30.0/go.mod h1:hspt+NCM0m7T8fjVwVFurdR9a+af7wcmPJYQJnqkdCM=
+github.com/palantir/witchcraft-go-params v1.31.0 h1:WnSbITvTk/DYWK2aZ5xCTKnjv0McHVnk7BE3CuvnddE=
+github.com/palantir/witchcraft-go-params v1.31.0/go.mod h1:hspt+NCM0m7T8fjVwVFurdR9a+af7wcmPJYQJnqkdCM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
