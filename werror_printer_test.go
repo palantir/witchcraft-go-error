@@ -85,8 +85,7 @@ func TestErrorFormatting(t *testing.T) {
 		},
 	} {
 		t.Run(currCase.name, func(t *testing.T) {
-			errString := GenerateErrorString(currCase.err, currCase.outputEveryCallingStack)
-			assert.Regexp(t, currCase.expectedRegex, errString)
+			assert.Regexp(t, currCase.expectedRegex, GenerateErrorString(currCase.err, currCase.outputEveryCallingStack))
 		})
 	}
 }
