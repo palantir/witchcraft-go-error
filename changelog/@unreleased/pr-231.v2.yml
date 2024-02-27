@@ -1,0 +1,5 @@
+type: fix
+fix:
+  description: GenerateErrorStrings dereferences params that are pointers
+  links:
+  - https://github.com/palantir/witchcraft-go-error/pull/231

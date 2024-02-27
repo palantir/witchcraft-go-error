@@ -72,6 +72,17 @@ func TestErrorFormatting(t *testing.T) {
 				"inner0Message inner0ParamKey:inner0VParamValue, inner0ParamKey1:inner0VParamValue1, inner0ParamKey2:inner0VParamValue2\n\n" +
 				stackTraceString,
 		},
+		{
+			name: "error with pointer params",
+			err: ErrorWithContextParams(context.Background(), "simple_error",
+				SafeParam("key1", &[]string{"value"}[0]),
+				SafeParam("key2", &[]int{42}[0]),
+				SafeParam("key3", (*string)(nil)),
+			),
+			expectedRegex: "" +
+				"simple_error key1:value, key2:42, key3:<nil>\n\n" +
+				stackTraceString,
+		},
 	} {
 		t.Run(currCase.name, func(t *testing.T) {
 			assert.Regexp(t, currCase.expectedRegex, GenerateErrorString(currCase.err, currCase.outputEveryCallingStack))
