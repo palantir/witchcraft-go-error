@@ -8,7 +8,7 @@ import (
 )
 
 const stackTraceString = ".*github.com/palantir/witchcraft-go-error.TestErrorFormatting\n" +
-	".*github.com/palantir/witchcraft-go-error/werror_printer_test.*\n" +
+	".*/werror_printer_test.*\n" +
 	"testing.tRunner\n" +
 	".*src/testing/testing.go.*\n" +
 	"runtime.goexit\n" +
