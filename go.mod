@@ -1,6 +1,6 @@
 module github.com/palantir/witchcraft-go-error
 
-go 1.23.0
+go 1.24.0
 
 require (
 	github.com/palantir/witchcraft-go-params v1.37.0
