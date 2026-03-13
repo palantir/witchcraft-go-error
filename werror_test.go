@@ -20,15 +20,15 @@ type paramObject struct {
 }
 
 type testParameterStorerObject struct {
-	safeParams   map[string]interface{}
-	unsafeParams map[string]interface{}
+	safeParams   map[string]any
+	unsafeParams map[string]any
 }
 
-func (t testParameterStorerObject) SafeParams() map[string]interface{} {
+func (t testParameterStorerObject) SafeParams() map[string]any {
 	return t.safeParams
 }
 
-func (t testParameterStorerObject) UnsafeParams() map[string]interface{} {
+func (t testParameterStorerObject) UnsafeParams() map[string]any {
 	return t.unsafeParams
 }
 
@@ -215,28 +215,28 @@ func TestParamsFromError(t *testing.T) {
 	for _, currCase := range []struct {
 		name             string
 		err              error
-		wantSafeParams   map[string]interface{}
-		wantUnsafeParams map[string]interface{}
+		wantSafeParams   map[string]any
+		wantUnsafeParams map[string]any
 	}{
 		{
 			name:             "without params",
 			err:              fmt.Errorf("regular error"),
-			wantSafeParams:   map[string]interface{}{},
-			wantUnsafeParams: map[string]interface{}{},
+			wantSafeParams:   map[string]any{},
+			wantUnsafeParams: map[string]any{},
 		},
 		{
 			name:             "nil error",
 			err:              nil,
-			wantSafeParams:   map[string]interface{}{},
-			wantUnsafeParams: map[string]interface{}{},
+			wantSafeParams:   map[string]any{},
+			wantUnsafeParams: map[string]any{},
 		},
 		{
 			name: "with the same safe and unsafe param key",
 			err: werror.ErrorWithContextParams(context.Background(), "err",
 				werror.SafeParam("key", "safeValue"),
 				werror.UnsafeParam("key", "unsafeValue")),
-			wantSafeParams: map[string]interface{}{},
-			wantUnsafeParams: map[string]interface{}{
+			wantSafeParams: map[string]any{},
+			wantUnsafeParams: map[string]any{
 				"key": "unsafeValue",
 			},
 		},
@@ -245,10 +245,10 @@ func TestParamsFromError(t *testing.T) {
 			err: werror.ErrorWithContextParams(context.Background(), "err",
 				werror.UnsafeParam("key", "unsafeValue"),
 				werror.SafeParam("key", "safeValue")),
-			wantSafeParams: map[string]interface{}{
+			wantSafeParams: map[string]any{
 				"key": "safeValue",
 			},
-			wantUnsafeParams: map[string]interface{}{},
+			wantUnsafeParams: map[string]any{},
 		},
 		{
 			name: "with nested params",
@@ -265,11 +265,11 @@ func TestParamsFromError(t *testing.T) {
 				werror.UnsafeParam("unsafeWrapperKey", "unsafeWrapperValue"),
 				werror.SafeParam("safeWrapperKey", "safeWrapperValue"),
 			),
-			wantSafeParams: map[string]interface{}{
+			wantSafeParams: map[string]any{
 				"safeRootKey":    "safeRootValue",
 				"safeWrapperKey": "safeWrapperValue",
 			},
-			wantUnsafeParams: map[string]interface{}{
+			wantUnsafeParams: map[string]any{
 				"unsafeRootKey":    "unsafeRootValue",
 				"unsafeWrapperKey": "unsafeWrapperValue",
 			},
@@ -278,33 +278,33 @@ func TestParamsFromError(t *testing.T) {
 			name: "with empty safe and unsafe params param",
 			err: werror.ErrorWithContextParams(context.Background(), "error",
 				werror.SafeAndUnsafeParams(
-					map[string]interface{}{},
-					map[string]interface{}{},
+					map[string]any{},
+					map[string]any{},
 				),
 			),
-			wantSafeParams:   map[string]interface{}{},
-			wantUnsafeParams: map[string]interface{}{},
+			wantSafeParams:   map[string]any{},
+			wantUnsafeParams: map[string]any{},
 		},
 		{
 			name: "with safe and unsafe params param",
 			err: werror.ErrorWithContextParams(context.Background(), "error",
 				werror.SafeAndUnsafeParams(
-					map[string]interface{}{
+					map[string]any{
 						"safeKey": "safeVal",
 						"config":  "logging",
 					},
-					map[string]interface{}{
+					map[string]any{
 						"unsafeKey": "unsafeVal",
 						"commonKey": "level4",
 						"fileName":  "logger.txt",
 					},
 				),
 			),
-			wantSafeParams: map[string]interface{}{
+			wantSafeParams: map[string]any{
 				"safeKey": "safeVal",
 				"config":  "logging",
 			},
-			wantUnsafeParams: map[string]interface{}{
+			wantUnsafeParams: map[string]any{
 				"unsafeKey": "unsafeVal",
 				"commonKey": "level4",
 				"fileName":  "logger.txt",
@@ -323,7 +323,7 @@ func TestParamFromError(t *testing.T) {
 	for _, currCase := range []struct {
 		name          string
 		err           error
-		expectedValue interface{}
+		expectedValue any
 		expectedSafe  bool
 	}{{
 		name: "nil error",
@@ -366,8 +366,8 @@ func TestParamsFromError_FromParameterStorerObject(t *testing.T) {
 		name string
 		//parameterStorerObject werror.ParamStorer
 		inErr            error
-		wantSafeParams   map[string]interface{}
-		wantUnsafeParams map[string]interface{}
+		wantSafeParams   map[string]any
+		wantUnsafeParams map[string]any
 	}{
 		{
 			name: "empty parameterStorer",
@@ -375,8 +375,8 @@ func TestParamsFromError_FromParameterStorerObject(t *testing.T) {
 				"error",
 				werror.Params(testParameterStorerObject{}),
 			),
-			wantSafeParams:   map[string]interface{}{},
-			wantUnsafeParams: map[string]interface{}{},
+			wantSafeParams:   map[string]any{},
+			wantUnsafeParams: map[string]any{},
 		},
 		{
 			name: "nil parameterStorer",
@@ -384,26 +384,26 @@ func TestParamsFromError_FromParameterStorerObject(t *testing.T) {
 				"error",
 				werror.Params(nil),
 			),
-			wantSafeParams:   map[string]interface{}{},
-			wantUnsafeParams: map[string]interface{}{},
+			wantSafeParams:   map[string]any{},
+			wantUnsafeParams: map[string]any{},
 		},
 		{
 			name: "parameterStorer with safe and unsafe params",
 			inErr: werror.ErrorWithContextParams(context.Background(),
 				"error",
 				werror.Params(testParameterStorerObject{
-					safeParams: map[string]interface{}{
+					safeParams: map[string]any{
 						"safeObjectParamKey": "safeObjectParamValue",
 					},
-					unsafeParams: map[string]interface{}{
+					unsafeParams: map[string]any{
 						"unsafeObjectParamKey": "unsafeObjectParamValue",
 					},
 				}),
 			),
-			wantSafeParams: map[string]interface{}{
+			wantSafeParams: map[string]any{
 				"safeObjectParamKey": "safeObjectParamValue",
 			},
-			wantUnsafeParams: map[string]interface{}{
+			wantUnsafeParams: map[string]any{
 				"unsafeObjectParamKey": "unsafeObjectParamValue",
 			},
 		},
@@ -411,17 +411,17 @@ func TestParamsFromError_FromParameterStorerObject(t *testing.T) {
 			name: "non-werror ParamStorer error",
 			inErr: &customParamStorerError{
 				msg: "error",
-				safeParams: map[string]interface{}{
+				safeParams: map[string]any{
 					"safeObjectParamKey": "safeObjectParamValue",
 				},
-				unsafeParams: map[string]interface{}{
+				unsafeParams: map[string]any{
 					"unsafeObjectParamKey": "unsafeObjectParamValue",
 				},
 			},
-			wantSafeParams: map[string]interface{}{
+			wantSafeParams: map[string]any{
 				"safeObjectParamKey": "safeObjectParamValue",
 			},
-			wantUnsafeParams: map[string]interface{}{
+			wantUnsafeParams: map[string]any{
 				"unsafeObjectParamKey": "unsafeObjectParamValue",
 			},
 		},
@@ -430,19 +430,19 @@ func TestParamsFromError_FromParameterStorerObject(t *testing.T) {
 			inErr: werror.WrapWithContextParams(context.Background(),
 				&customParamStorerError{
 					msg: "error",
-					safeParams: map[string]interface{}{
+					safeParams: map[string]any{
 						"safeObjectParamKey": "safeObjectParamValue",
 					},
-					unsafeParams: map[string]interface{}{
+					unsafeParams: map[string]any{
 						"unsafeObjectParamKey": "unsafeObjectParamValue",
 					},
 				},
 				"error",
 			),
-			wantSafeParams: map[string]interface{}{
+			wantSafeParams: map[string]any{
 				"safeObjectParamKey": "safeObjectParamValue",
 			},
-			wantUnsafeParams: map[string]interface{}{
+			wantUnsafeParams: map[string]any{
 				"unsafeObjectParamKey": "unsafeObjectParamValue",
 			},
 		},
@@ -457,14 +457,14 @@ func TestParamsFromError_FromParameterStorerObject(t *testing.T) {
 
 type customParamStorerError struct {
 	msg                      string
-	safeParams, unsafeParams map[string]interface{}
+	safeParams, unsafeParams map[string]any
 }
 
-func (e *customParamStorerError) SafeParams() map[string]interface{} {
+func (e *customParamStorerError) SafeParams() map[string]any {
 	return e.safeParams
 }
 
-func (e *customParamStorerError) UnsafeParams() map[string]interface{} {
+func (e *customParamStorerError) UnsafeParams() map[string]any {
 	return e.unsafeParams
 }
 
@@ -554,51 +554,51 @@ func TestRootCause(t *testing.T) {
 
 func TestErrorPullsOutParamsFromContext(t *testing.T) {
 	ctx := context.Background()
-	safe := map[string]interface{}{"safeKey": "safeValue"}
-	unsafe := map[string]interface{}{"unsafeKey": "unsafeValue"}
+	safe := map[string]any{"safeKey": "safeValue"}
+	unsafe := map[string]any{"unsafeKey": "unsafeValue"}
 	ctx = wparams.ContextWithSafeAndUnsafeParams(ctx, safe, unsafe)
 	err := werror.ErrorWithContextParams(ctx, "error", werror.SafeParam("anotherSafeKey", "anotherSafeValue"), werror.UnsafeParam("anotherUnsafeKey", "anotherUnsafeValue"))
 	safeFromError, unSafeFromError := werror.ParamsFromError(err)
-	assert.Equal(t, map[string]interface{}{"safeKey": "safeValue", "anotherSafeKey": "anotherSafeValue"}, safeFromError)
-	assert.Equal(t, map[string]interface{}{"unsafeKey": "unsafeValue", "anotherUnsafeKey": "anotherUnsafeValue"}, unSafeFromError)
+	assert.Equal(t, map[string]any{"safeKey": "safeValue", "anotherSafeKey": "anotherSafeValue"}, safeFromError)
+	assert.Equal(t, map[string]any{"unsafeKey": "unsafeValue", "anotherUnsafeKey": "anotherUnsafeValue"}, unSafeFromError)
 }
 
 func TestWrapPullsOutParamsFromContext(t *testing.T) {
 	ctx := context.Background()
-	safe := map[string]interface{}{"safeKey": "safeValue"}
-	unsafe := map[string]interface{}{"unsafeKey": "unsafeValue"}
+	safe := map[string]any{"safeKey": "safeValue"}
+	unsafe := map[string]any{"unsafeKey": "unsafeValue"}
 	ctx = wparams.ContextWithSafeAndUnsafeParams(ctx, safe, unsafe)
 	rawErr := werror.Error("err", werror.SafeParam("anotherSafeKey", "anotherSafeValue"), werror.UnsafeParam("anotherUnsafeKey", "anotherUnsafeValue"))
 	err := werror.WrapWithContextParams(ctx, rawErr, "bad", werror.SafeParam("aThirdSafeKey", "aThirdSafeValue"), werror.UnsafeParam("aThirdUnsafeKey", "aThirdUnsafeValue"))
 	safeFromError, unSafeFromError := werror.ParamsFromError(err)
-	assert.Equal(t, map[string]interface{}{"safeKey": "safeValue", "anotherSafeKey": "anotherSafeValue", "aThirdSafeKey": "aThirdSafeValue"}, safeFromError)
-	assert.Equal(t, map[string]interface{}{"unsafeKey": "unsafeValue", "anotherUnsafeKey": "anotherUnsafeValue", "aThirdUnsafeKey": "aThirdUnsafeValue"}, unSafeFromError)
+	assert.Equal(t, map[string]any{"safeKey": "safeValue", "anotherSafeKey": "anotherSafeValue", "aThirdSafeKey": "aThirdSafeValue"}, safeFromError)
+	assert.Equal(t, map[string]any{"unsafeKey": "unsafeValue", "anotherUnsafeKey": "anotherUnsafeValue", "aThirdUnsafeKey": "aThirdUnsafeValue"}, unSafeFromError)
 }
 
 func TestSafeParams(t *testing.T) {
 	err := werror.Error("first", werror.SafeParam("key", "value"))
 	err2 := werror.Wrap(err, "second", werror.SafeParam("key2", "value2"))
 	err3 := werror.Wrap(err2, "second", werror.SafeParam("key3", "value3"))
-	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2"}, err2.(werror.Werror).SafeParams())
-	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err3.(werror.Werror).SafeParams())
+	assert.Equal(t, map[string]any{"key": "value", "key2": "value2"}, err2.(werror.Werror).SafeParams())
+	assert.Equal(t, map[string]any{"key": "value", "key2": "value2", "key3": "value3"}, err3.(werror.Werror).SafeParams())
 
 	// The deepest (innermost) error's param key assignment should win, so overriding the key on the outermost
 	// wrapping error should be a no-op.
 	err4 := werror.Wrap(err3, "second", werror.SafeParam("key", "value4"))
-	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err4.(werror.Werror).SafeParams())
+	assert.Equal(t, map[string]any{"key": "value", "key2": "value2", "key3": "value3"}, err4.(werror.Werror).SafeParams())
 }
 
 func TestUnsafeParams(t *testing.T) {
 	err := werror.Error("first", werror.UnsafeParam("key", "value"))
 	err2 := werror.Wrap(err, "second", werror.UnsafeParam("key2", "value2"))
 	err3 := werror.Wrap(err2, "second", werror.UnsafeParam("key3", "value3"))
-	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2"}, err2.(werror.Werror).UnsafeParams())
-	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err3.(werror.Werror).UnsafeParams())
+	assert.Equal(t, map[string]any{"key": "value", "key2": "value2"}, err2.(werror.Werror).UnsafeParams())
+	assert.Equal(t, map[string]any{"key": "value", "key2": "value2", "key3": "value3"}, err3.(werror.Werror).UnsafeParams())
 
 	// The deepest (innermost) error's param key assignment should win, so overriding the key on the outermost
 	// wrapping error should be a no-op.
 	err4 := werror.Wrap(err3, "second", werror.UnsafeParam("key", "value4"))
-	assert.Equal(t, map[string]interface{}{"key": "value", "key2": "value2", "key3": "value3"}, err4.(werror.Werror).UnsafeParams())
+	assert.Equal(t, map[string]any{"key": "value", "key2": "value2", "key3": "value3"}, err4.(werror.Werror).UnsafeParams())
 }
 
 func TestNewStackTrace(t *testing.T) {
