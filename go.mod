@@ -2,6 +2,8 @@ module github.com/palantir/witchcraft-go-error
 
 go 1.26.0
 
+toolchain go1.26.3
+
 require (
 	github.com/palantir/witchcraft-go-params v1.41.0
 	github.com/stretchr/testify v1.11.1
