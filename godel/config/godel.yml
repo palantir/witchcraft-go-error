@@ -6,7 +6,6 @@ plugins:
         id: com.palantir.godel-mod-plugin:mod-plugin:1.55.0
         checksums:
           darwin-amd64: e803e97fcbb16fdc11a0630bb11c79b903a8960af3461d06d6fbc3744eff30d6
-          darwin-arm64: c18eb069f1550d04773e16eb6948f880b628558f15556702b84c32571087f147
           linux-amd64: 4d5637d802b832e562ddc15d78e40c24180106c1195c57c096b365f40fae85e9
           linux-arm64: 92963392dc6d060686789a447f8f992afd0e51ff335b17475976cf51ae02ba23
 environment:
