@@ -1,5 +1,5 @@
-github.com/palantir/witchcraft-go-params v1.45.0 h1:J1gJYvIzv0d/LzlmuYSXqSl6Z0r4IyqZYQ2G+uz+KG0=
-github.com/palantir/witchcraft-go-params v1.45.0/go.mod h1:g8yBKlKoLL7WpuLmueA6KYCN1ausuxhFnPA2vKyf/FU=
+github.com/palantir/witchcraft-go-params v1.46.0 h1:yWKG+COZAKZEpr4aWp1ngneCZ2f2F403v2WL2HupOa0=
+github.com/palantir/witchcraft-go-params v1.46.0/go.mod h1:uXTr9aeU7ev10e10GLqXKq6Ohw6Ib/0QYRvCbLa3LI4=
 github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWDWE=
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
