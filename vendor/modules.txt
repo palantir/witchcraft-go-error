@@ -1,4 +1,4 @@
-# github.com/palantir/witchcraft-go-params v1.45.0
+# github.com/palantir/witchcraft-go-params v1.46.0
 ## explicit; go 1.26.0
 github.com/palantir/witchcraft-go-params
 # github.com/stretchr/testify v1.12.1
