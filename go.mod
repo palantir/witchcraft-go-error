@@ -2,7 +2,7 @@ module github.com/palantir/witchcraft-go-error
 
 go 1.26.0
 
-toolchain go1.26.5
+toolchain go1.26.7
 
 require (
 	github.com/palantir/witchcraft-go-params v1.46.0
