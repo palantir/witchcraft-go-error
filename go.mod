@@ -5,7 +5,7 @@ go 1.27.0
 toolchain go1.27.1
 
 require (
-	github.com/palantir/witchcraft-go-params v1.49.0
+	github.com/palantir/witchcraft-go-params v1.50.0
 	github.com/stretchr/testify v1.12.1
 )
 
